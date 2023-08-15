@@ -82,7 +82,16 @@ async function run() {
 
         
         //Get All jobs
-        app.get('/allJobs', async (req, res) => {
+        app.get('/allJobs', verifyJWT, async (req, res) => {
+            
+            const decodedEmail = req.decoded.email;
+            const filter = { email: decodedEmail };
+            const user = await usersCollection.findOne(filter);
+            if (user?.email !== decodedEmail) {
+                return res.status(403).send({ message: 'Forbidden Access' })
+            }
+            
+            
             const query = {};
             const result = await jobsCollection.find(query).toArray()
             res.send(result);
